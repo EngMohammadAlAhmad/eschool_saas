@@ -346,6 +346,26 @@ class HomeScreenState extends State<HomeScreen>
     }
   }
 
+  Future<void> _closeCurrentMenuItemContainer() async {
+    if (_currentlyOpenMenuIndex == -1) {
+      await _closeBottomMenu();
+      return;
+    }
+
+    if (_moreMenuBottomsheetAnimationController.isAnimating) {
+      return;
+    }
+
+    await _moreMenuBottomsheetAnimationController.reverse();
+    setState(() {
+      _isMoreMenuOpen = false;
+      _currentlyOpenMenuIndex = -1;
+      if (_previousSelectedBottmNavIndex != -1) {
+        _currentSelectedBottomNavIndex = _previousSelectedBottmNavIndex;
+      }
+    });
+  }
+
   Future<void> _handleTransportNavigation() async {
     // Get current student profile
     final student =
@@ -564,10 +584,12 @@ class HomeScreenState extends State<HomeScreen>
   //it _currentlyOpenMenuIndex is 0 then load the container based on homeBottomSheetMenu[_currentlyOpenMenuIndex]
   Widget _buildMenuItemContainer() {
     if (homeBottomSheetMenu[_currentlyOpenMenuIndex].title == attendanceKey) {
-      return const AttendanceContainer();
+      return AttendanceContainer(
+          onBackPressed: () => _closeCurrentMenuItemContainer());
     }
     if (homeBottomSheetMenu[_currentlyOpenMenuIndex].title == timeTableKey) {
-      return const TimeTableContainer();
+      return TimeTableContainer(
+          onBackPressed: () => _closeCurrentMenuItemContainer());
     }
     if (homeBottomSheetMenu[_currentlyOpenMenuIndex].title == settingsKey) {
       return const SettingsContainer();
@@ -579,11 +601,15 @@ class HomeScreenState extends State<HomeScreen>
     }
     if (homeBottomSheetMenu[_currentlyOpenMenuIndex].title ==
         guardianDetailsKey) {
-      return const GuardianProfileContainer();
+      return GuardianProfileContainer(
+        onBackPressed: () => _closeCurrentMenuItemContainer(),
+      );
     }
 
     if (homeBottomSheetMenu[_currentlyOpenMenuIndex].title == holidaysKey) {
-      return const HolidaysContainer();
+      return HolidaysContainer(
+        onBackPressed: () => _closeCurrentMenuItemContainer(),
+      );
     }
     if (homeBottomSheetMenu[_currentlyOpenMenuIndex].title == examsKey) {
       return const ExamContainer();
@@ -617,7 +643,10 @@ class HomeScreenState extends State<HomeScreen>
                     .read<StudentProfileCubit>()
                     .getCurrentStudentProfile();
             return SchoolGalleryWithSessionYearFilterContainer(
-                showBackButton: false, student: student);
+              showBackButton: true,
+              student: student,
+              onBackPressed: () => _closeCurrentMenuItemContainer(),
+            );
           },
         ),
       );

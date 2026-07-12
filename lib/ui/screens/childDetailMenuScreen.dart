@@ -261,7 +261,7 @@ class ChildDetailMenuScreenState extends State<ChildDetailMenuScreen> {
         route: Routes.certificate,
         arguments: widget.student.userId,
         iconPath: Utils.getImagePath("Certificate.svg"),
-        title: Utils.getTranslatedLabel(certificateKey),
+        title: Utils.getTranslatedLabel(cancelKey),
       ),
       MenuContainerDetails(
         moduleId: studentManagementModuleId.toString(),

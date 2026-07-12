@@ -67,10 +67,10 @@ class CustomAppBar extends StatelessWidget {
               Align(
                 child: Padding(
                   padding: EdgeInsetsDirectional.only(
-                      top: boxConstraints.maxHeight * (0.31) +
-                          Utils.screenTitleFontSize,
-                      start: Utils.screenContentHorizontalPadding,
-                      end: Utils.screenContentHorizontalPadding),
+                    top: boxConstraints.maxHeight * (0.31) + Utils.screenTitleFontSize,
+                    start: Utils.screenContentHorizontalPadding,
+                    end: Utils.screenContentHorizontalPadding,
+                  ),
                   child: Text(
                     subTitle ?? "",
                     textAlign: TextAlign.center,

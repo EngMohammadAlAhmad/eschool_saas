@@ -5,10 +5,12 @@ import 'package:eschool/cubits/schoolGalleryCubit.dart';
 import 'package:eschool/cubits/schoolSessionYearsCubit.dart';
 import 'package:eschool/data/models/sessionYear.dart';
 import 'package:eschool/data/models/student.dart';
-import 'package:eschool/ui/widgets/customAppbar.dart';
+import 'package:eschool/ui/widgets/customBackButton.dart';
 import 'package:eschool/ui/widgets/customCircularProgressIndicator.dart';
 import 'package:eschool/ui/widgets/errorContainer.dart';
 import 'package:eschool/ui/widgets/noDataContainer.dart';
+import 'package:eschool/ui/widgets/screenTopBackgroundContainer.dart';
+import 'package:eschool/ui/widgets/svgButton.dart';
 import 'package:eschool/utils/labelKeys.dart';
 import 'package:eschool/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -19,8 +21,13 @@ import 'package:get/get.dart';
 class SchoolGalleryWithSessionYearFilterContainer extends StatefulWidget {
   final Student student;
   final bool showBackButton;
-  const SchoolGalleryWithSessionYearFilterContainer(
-      {super.key, required this.student, required this.showBackButton});
+  final VoidCallback? onBackPressed;
+  const SchoolGalleryWithSessionYearFilterContainer({
+    super.key,
+    required this.student,
+    required this.showBackButton,
+    this.onBackPressed,
+  });
 
   @override
   State<SchoolGalleryWithSessionYearFilterContainer> createState() =>
@@ -50,6 +57,20 @@ class _SchoolGalleryWithSessionYearFilterContainerState
     context.read<SchoolGalleryCubit>().fetchSchoolGallery(
         useParentApi: context.read<AuthCubit>().isParent(),
         sessionYearId: selectedSessionYear.id ?? 0);
+  }
+
+  void _handleBackNavigation() {
+    if (widget.onBackPressed != null) {
+      widget.onBackPressed!.call();
+      return;
+    }
+
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    Get.back();
   }
 
   Widget _buildSessionYearDropDown() {
@@ -124,149 +145,192 @@ class _SchoolGalleryWithSessionYearFilterContainerState
     );
   }
 
+  Widget _buildAppBar() {
+    return ScreenTopBackgroundContainer(
+      heightPercentage: Utils.appBarSmallerHeightPercentage,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          widget.showBackButton
+              ? CustomBackButton(onTap: _handleBackNavigation)
+              : const SizedBox(),
+          Align(
+            alignment: Alignment.topCenter,
+            child: Text(
+              Utils.getTranslatedLabel(galleryKey),
+              style: TextStyle(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                fontSize: Utils.screenTitleFontSize,
+              ),
+            ),
+          ),
+          widget.showBackButton
+              ? Align(
+                  alignment: AlignmentDirectional.topStart,
+                  child: Padding(
+                    padding: EdgeInsetsDirectional.only(
+                      start: Utils.screenContentHorizontalPadding,
+                    ),
+                    child: SvgButton(
+                      onTap: _handleBackNavigation,
+                      svgIconUrl: Utils.getBackButtonPath(context),
+                    ),
+                  ),
+                )
+              : const SizedBox(),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        SingleChildScrollView(
-          padding: EdgeInsets.only(
-              bottom: 80,
-              left: Utils.screenContentHorizontalPadding,
-              right: Utils.screenContentHorizontalPadding,
-              top: Utils.getScrollViewTopPadding(
-                  context: context,
-                  appBarHeightPercentage: Utils.appBarSmallerHeightPercentage)),
-          child: Column(
-            children: [
-              _buildSessionYearDropDown(),
-              const SizedBox(
-                height: 25,
-              ),
-              BlocBuilder<SchoolGalleryCubit, SchoolGalleryState>(
-                builder: (context, state) {
-                  if (state is SchoolGalleryFetchSuccess) {
-                    if (state.gallery.isEmpty) {
-                      return Center(
-                          child: Center(
-                        child: NoDataContainer(
-                            titleKey: noGalleryDataAvailableForThisSessionKey),
-                      ));
-                    }
+        Column(
+          children: [
+            SingleChildScrollView(
+              padding: EdgeInsets.only(
+                  bottom: 80,
+                  left: Utils.screenContentHorizontalPadding,
+                  right: Utils.screenContentHorizontalPadding,
+                  top: Utils.getScrollViewTopPadding(
+                      context: context,
+                      appBarHeightPercentage:
+                          Utils.appBarSmallerHeightPercentage)),
+              child: Column(
+                children: [
+                  BlocBuilder<SchoolGalleryCubit, SchoolGalleryState>(
+                    builder: (context, state) {
+                      if (state is SchoolGalleryFetchSuccess) {
+                        if (state.gallery.isEmpty) {
+                          return Center(
+                              child: Center(
+                            child: NoDataContainer(
+                                titleKey:
+                                    noGalleryDataAvailableForThisSessionKey),
+                          ));
+                        }
 
-                    return Column(
-                      children: state.gallery.reversed.map((gallery) {
-                        final photosAndVideosCountTextStyle = TextStyle(
-                            fontSize: 12.0,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .secondary
-                                .withValues(alpha: 0.65));
                         return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                Get.toNamed(Routes.galleryDetails, arguments: {
-                                  "gallery": gallery,
-                                  "sessionYear": selectedSessionYear
-                                });
-                              },
-                              child: Container(
-                                width: MediaQuery.of(context).size.width,
-                                height: 175,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(
-                                      Utils.bottomSheetTopRadius),
-                                  child: gallery.isThumbnailSvg()
-                                      ? SvgPicture.network(
-                                          gallery.thumbnail ?? "",
-                                          fit: BoxFit.cover,
-                                        )
-                                      : CachedNetworkImage(
-                                          imageUrl: gallery.thumbnail ?? "",
-                                          fit: BoxFit.cover,
-                                        ),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(bottom: 5, top: 15),
-                              child: Text(
-                                (gallery.title ?? ""),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  height: 1.0,
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            Row(
+                          children: state.gallery.reversed.map((gallery) {
+                            final photosAndVideosCountTextStyle = TextStyle(
+                                fontSize: 12.0,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .secondary
+                                    .withValues(alpha: 0.65));
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                gallery.getImages().isNotEmpty
-                                    ? Text(
-                                        "${gallery.getImages().length} ${Utils.getTranslatedLabel(gallery.getImages().length == 1 ? photoKey : photosKey)}",
-                                        style: photosAndVideosCountTextStyle,
-                                      )
-                                    : const SizedBox(),
-                                gallery.getVideos().isNotEmpty &&
-                                        gallery.getImages().isNotEmpty
-                                    ? Text(
-                                        " | ",
-                                        style: photosAndVideosCountTextStyle,
-                                      )
-                                    : const SizedBox(),
-                                gallery.getVideos().isNotEmpty
-                                    ? Text(
-                                        "${gallery.getVideos().length} ${Utils.getTranslatedLabel(gallery.getVideos().length == 1 ? videoKey : videosKey)}",
-                                        style: photosAndVideosCountTextStyle,
-                                      )
-                                    : const SizedBox(),
+                                GestureDetector(
+                                  onTap: () {
+                                    Get.toNamed(Routes.galleryDetails,
+                                        arguments: {
+                                          "gallery": gallery,
+                                          "sessionYear": selectedSessionYear
+                                        });
+                                  },
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width,
+                                    height: 175,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(
+                                          Utils.bottomSheetTopRadius),
+                                      child: gallery.isThumbnailSvg()
+                                          ? SvgPicture.network(
+                                              gallery.thumbnail ?? "",
+                                              fit: BoxFit.cover,
+                                            )
+                                          : CachedNetworkImage(
+                                              imageUrl: gallery.thumbnail ?? "",
+                                              fit: BoxFit.cover,
+                                            ),
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.only(bottom: 5, top: 15),
+                                  child: Text(
+                                    (gallery.title ?? ""),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      height: 1.0,
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 5,
+                                ),
+                                Row(
+                                  children: [
+                                    gallery.getImages().isNotEmpty
+                                        ? Text(
+                                            "${gallery.getImages().length} ${Utils.getTranslatedLabel(gallery.getImages().length == 1 ? photoKey : photosKey)}",
+                                            style:
+                                                photosAndVideosCountTextStyle,
+                                          )
+                                        : const SizedBox(),
+                                    gallery.getVideos().isNotEmpty &&
+                                            gallery.getImages().isNotEmpty
+                                        ? Text(
+                                            " | ",
+                                            style:
+                                                photosAndVideosCountTextStyle,
+                                          )
+                                        : const SizedBox(),
+                                    gallery.getVideos().isNotEmpty
+                                        ? Text(
+                                            "${gallery.getVideos().length} ${Utils.getTranslatedLabel(gallery.getVideos().length == 1 ? videoKey : videosKey)}",
+                                            style:
+                                                photosAndVideosCountTextStyle,
+                                          )
+                                        : const SizedBox(),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 25,
+                                ),
                               ],
-                            ),
-                            SizedBox(
-                              height: 25,
-                            ),
-                          ],
+                            );
+                          }).toList(),
                         );
-                      }).toList(),
-                    );
-                  }
-                  if (state is SchoolGalleryFetchFailure) {
-                    return Center(
-                      child: ErrorContainer(
-                        errorMessageCode: state.errorMessage,
-                        onTapRetry: () {
-                          fetchSchoolGallerySessionYearWise();
-                        },
-                      ),
-                    );
-                  }
-                  return Padding(
-                    padding: EdgeInsets.only(
-                        top: MediaQuery.of(context).size.height * (0.3)),
-                    child: Center(
-                      child: CustomCircularProgressIndicator(
-                        indicatorColor: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                  );
-                },
-              )
-            ],
-          ),
+                      }
+                      if (state is SchoolGalleryFetchFailure) {
+                        return Center(
+                          child: ErrorContainer(
+                            errorMessageCode: state.errorMessage,
+                            onTapRetry: () {
+                              fetchSchoolGallerySessionYearWise();
+                            },
+                          ),
+                        );
+                      }
+                      return Padding(
+                        padding: EdgeInsets.only(
+                            top: MediaQuery.of(context).size.height * (0.3)),
+                        child: Center(
+                          child: CustomCircularProgressIndicator(
+                            indicatorColor:
+                                Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                ],
+              ),
+            ),
+          ],
         ),
         Align(
-            alignment: Alignment.topCenter,
-            child: CustomAppBar(
-              title: galleryKey,
-              showBackButton: widget.showBackButton,
-            )),
+          alignment: Alignment.topCenter,
+          child: _buildAppBar(),
+        ),
       ],
     );
   }

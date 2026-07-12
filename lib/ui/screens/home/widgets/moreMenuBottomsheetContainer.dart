@@ -19,17 +19,17 @@ class MoreMenuBottomsheetContainer extends StatelessWidget {
     required this.closeBottomMenu,
   }) : super(key: key);
 
-  Widget _buildMoreMenuContainer(
-      {required BuildContext context,
-      required BoxConstraints boxConstraints,
-      required Menu menu}) {
+  Widget _buildMoreMenuContainer({
+    required BuildContext context,
+    required BoxConstraints boxConstraints,
+    required Menu menu,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: GestureDetector(
         onTap: () {
           onTapMoreMenuItemContainer(
-            homeBottomSheetMenu
-                .indexWhere((element) => element.title == menu.title),
+            homeBottomSheetMenu.indexWhere((element) => element.title == menu.title),
           );
         },
         child: Column(

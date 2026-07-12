@@ -19,8 +19,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class NoticeBoardContainer extends StatefulWidget {
   final bool showBackButton;
   final int? childId;
+  final VoidCallback? onBackPressed;
   const NoticeBoardContainer(
-      {Key? key, required this.showBackButton, this.childId})
+      {Key? key,
+      required this.showBackButton,
+      this.childId,
+      this.onBackPressed})
       : super(key: key);
 
   @override
@@ -68,17 +72,30 @@ class _NoticeBoardContainerState extends State<NoticeBoardContainer> {
     super.dispose();
   }
 
+  void _handleBackNavigation() {
+    if (widget.onBackPressed != null) {
+      widget.onBackPressed!.call();
+      return;
+    }
+
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    Navigator.of(context).maybePop();
+  }
+
   Widget _buildAppBar() {
     return ScreenTopBackgroundContainer(
       padding: EdgeInsets.zero,
       heightPercentage: Utils.appBarSmallerHeightPercentage,
       child: Stack(
         children: [
-          widget.showBackButton
-              ? const CustomBackButton(
-                  alignmentDirectional: AlignmentDirectional.centerStart,
-                )
-              : const SizedBox(),
+          CustomBackButton(
+            alignmentDirectional: AlignmentDirectional.centerStart,
+            onTap: _handleBackNavigation,
+          ),
           Align(
             child: Text(
               Utils.getTranslatedLabel(noticeBoardKey),
@@ -136,11 +153,12 @@ class _NoticeBoardContainerState extends State<NoticeBoardContainer> {
       alignment: Alignment.topCenter,
       child: CustomRefreshIndicator(
         onRefreshCallback: () {
-          if (context.read<NoticeBoardCubit>().state is NoticeBoardFetchSuccess) {
+          if (context.read<NoticeBoardCubit>().state
+              is NoticeBoardFetchSuccess) {
             context.read<NoticeBoardCubit>().fetchNoticeBoardDetails(
-              useParentApi: context.read<AuthCubit>().isParent(),
-              childId: widget.childId,
-            );
+                  useParentApi: context.read<AuthCubit>().isParent(),
+                  childId: widget.childId,
+                );
           }
         },
         displacment: Utils.getScrollViewTopPadding(

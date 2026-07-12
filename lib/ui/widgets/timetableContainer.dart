@@ -9,6 +9,7 @@ import 'package:eschool/ui/widgets/noDataContainer.dart';
 import 'package:eschool/ui/widgets/screenTopBackgroundContainer.dart';
 import 'package:eschool/ui/widgets/shimmerLoadingContainer.dart';
 import 'package:eschool/ui/widgets/subjectImageContainer.dart';
+import 'package:eschool/ui/widgets/svgButton.dart';
 import 'package:eschool/utils/animationConfiguration.dart';
 import 'package:eschool/utils/constants.dart';
 import 'package:eschool/utils/labelKeys.dart';
@@ -17,10 +18,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 
 class TimeTableContainer extends StatefulWidget {
   final int? childId;
-  const TimeTableContainer({Key? key, this.childId}) : super(key: key);
+  final VoidCallback? onBackPressed;
+  const TimeTableContainer({Key? key, this.childId, this.onBackPressed})
+      : super(key: key);
 
   @override
   State<TimeTableContainer> createState() => _TimeTableContainerState();
@@ -28,7 +32,27 @@ class TimeTableContainer extends StatefulWidget {
 
 class _TimeTableContainerState extends State<TimeTableContainer>
     with SingleTickerProviderStateMixin {
-  late int _currentSelectedDayIndex = DateTime.now().weekday - 1;
+  final List<String> _orderedDayLabels = [
+    sundayKey,
+    mondayKey,
+    tuesdayKey,
+    wednesdayKey,
+    thursdayKey,
+    fridayKey,
+    saturdayKey,
+  ];
+
+  final List<String> _orderedFullDayNames = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+  ];
+
+  late int _currentSelectedDayIndex = DateTime.now().weekday % 7;
 
   @override
   void initState() {
@@ -44,7 +68,7 @@ class _TimeTableContainerState extends State<TimeTableContainer>
   List<TimeTableSlot> _buildTimeTableSlots(List<TimeTableSlot> timeTableSlot) {
     final dayWiseTimeTableSlots = timeTableSlot
         .where((element) =>
-            element.day == Utils.weekDaysFullForm[_currentSelectedDayIndex])
+            element.day == _orderedFullDayNames[_currentSelectedDayIndex])
         .toList();
     return dayWiseTimeTableSlots;
   }
@@ -123,7 +147,9 @@ class _TimeTableContainerState extends State<TimeTableContainer>
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          widget.childId == null ? const SizedBox() : const CustomBackButton(),
+          widget.childId == null
+              ? const SizedBox()
+              : CustomBackButton(onTap: _handleBackNavigation),
           Align(
             alignment: Alignment.topCenter,
             child: Text(
@@ -131,6 +157,18 @@ class _TimeTableContainerState extends State<TimeTableContainer>
               style: TextStyle(
                 color: Theme.of(context).scaffoldBackgroundColor,
                 fontSize: Utils.screenTitleFontSize,
+              ),
+            ),
+          ),
+          Align(
+            alignment: AlignmentDirectional.topStart,
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(
+                start: Utils.screenContentHorizontalPadding,
+              ),
+              child: SvgButton(
+                onTap: _handleBackNavigation,
+                svgIconUrl: Utils.getBackButtonPath(context),
               ),
             ),
           ),
@@ -170,6 +208,20 @@ class _TimeTableContainerState extends State<TimeTableContainer>
     );
   }
 
+  void _handleBackNavigation() {
+    if (widget.onBackPressed != null) {
+      widget.onBackPressed!.call();
+      return;
+    }
+
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    Get.back();
+  }
+
   Widget _buildDayContainer(int index) {
     return InkWell(
       onTap: () {
@@ -189,7 +241,7 @@ class _TimeTableContainerState extends State<TimeTableContainer>
         margin: EdgeInsetsDirectional.only(end: 12.5),
         padding: const EdgeInsets.all(7.5),
         child: Text(
-          Utils.getTranslatedLabel(Utils.weekDays[index]),
+          Utils.getTranslatedLabel(_orderedDayLabels[index]),
           style: TextStyle(
             fontSize: 13.0,
             fontWeight: FontWeight.w600,
@@ -205,7 +257,7 @@ class _TimeTableContainerState extends State<TimeTableContainer>
   Widget _buildDays() {
     final List<Widget> children = [];
 
-    for (var i = 0; i < Utils.weekDays.length; i++) {
+    for (var i = 0; i < _orderedDayLabels.length; i++) {
       children.add(_buildDayContainer(i));
     }
 

@@ -38,13 +38,13 @@ class ErrorContainer extends StatelessWidget {
         builder: (context, constraints) {
           final availableHeight = constraints.maxHeight;
           final isHeightConstrained = availableHeight != double.infinity;
-          
+
           if (isHeightConstrained) {
             // When height is constrained, use flexible layout
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 8),
+                const SizedBox(height: 8.0),
                 Flexible(
                   flex: 3,
                   child: Container(
@@ -54,7 +54,8 @@ class ErrorContainer extends StatelessWidget {
                     ),
                     child: SvgPicture.asset(
                       Utils.getImagePath(
-                        errorMessageCode == ErrorMessageKeysAndCode.noInternetCode
+                        errorMessageCode ==
+                                ErrorMessageKeysAndCode.noInternetCode
                             ? "noInternet.svg"
                             : "somethingWentWrong.svg",
                       ),
@@ -62,13 +63,14 @@ class ErrorContainer extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 8.0),
                 Flexible(
                   flex: 2,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
-                      Utils.getErrorMessageFromErrorCode(context, errorMessageCode),
+                      Utils.getErrorMessageFromErrorCode(
+                          context, errorMessageCode),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: errorMessageColor ??
@@ -78,13 +80,13 @@ class ErrorContainer extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 50.0),
                 if (showRetryButton ?? true)
                   Flexible(
                     flex: 1,
                     child: CustomRoundedButton(
                       height: 36,
-                      widthPercentage: 0.3,
+                      widthPercentage: 0.4,
                       backgroundColor: retryButtonBackgroundColor ??
                           Theme.of(context).colorScheme.primary,
                       onTap: () {
@@ -96,7 +98,7 @@ class ErrorContainer extends StatelessWidget {
                       showBorder: false,
                     ),
                   ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 8.0),
               ],
             );
           } else {
@@ -114,7 +116,8 @@ class ErrorContainer extends StatelessWidget {
                     ),
                     child: SvgPicture.asset(
                       Utils.getImagePath(
-                        errorMessageCode == ErrorMessageKeysAndCode.noInternetCode
+                        errorMessageCode ==
+                                ErrorMessageKeysAndCode.noInternetCode
                             ? "noInternet.svg"
                             : "somethingWentWrong.svg",
                       ),
@@ -125,7 +128,8 @@ class ErrorContainer extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
-                      Utils.getErrorMessageFromErrorCode(context, errorMessageCode),
+                      Utils.getErrorMessageFromErrorCode(
+                          context, errorMessageCode),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: errorMessageColor ??
@@ -137,8 +141,8 @@ class ErrorContainer extends StatelessWidget {
                   const SizedBox(height: 16),
                   if (showRetryButton ?? true)
                     CustomRoundedButton(
-                      height: 40,
-                      widthPercentage: 0.3,
+                      height: 40.0,
+                      widthPercentage: 0.4,
                       backgroundColor: retryButtonBackgroundColor ??
                           Theme.of(context).colorScheme.primary,
                       onTap: () {

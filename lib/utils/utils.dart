@@ -120,9 +120,11 @@ class Utils {
       case 'text':
         return getImagePath('title.svg');
       case 'number':
-        return getImagePath('numbers.svg');
+        //return getImagePath('numbers.svg');
+        return getImagePath('phone_icon.svg');
       case 'dropdown':
-        return getImagePath('chevron-down.svg');
+        //return getImagePath('chevron-down.svg');
+        return getImagePath('blood_icon.svg');
       case 'file':
         return getImagePath('info_pro_icon.svg');
       default:
@@ -254,20 +256,105 @@ class Utils {
     return dateString;
   }
 
-  static String formatApiDateTime(String dateTimeString) {
+  static String formatApiDateTime(
+    String dateTimeString, {
+    BuildContext? context,
+  }) {
     try {
-      if (dateTimeString.contains('/') && dateTimeString.contains(' ')) {
-        final parts = dateTimeString.split(' ');
-        if (parts.length >= 2) {
-          final timeParts = parts.sublist(1);
-          return timeParts.join(' ');
-        }
+      if (dateTimeString.trim().isEmpty) {
+        return '--';
       }
-      return dateTimeString;
+
+      final localeCode = Get.locale?.languageCode ??
+          (context != null
+              ? Localizations.localeOf(context).languageCode
+              : 'en');
+      final isArabic = localeCode == 'ar';
+
+      final parsed = _parseTimeComponents(dateTimeString, isArabic: isArabic);
+      if (parsed == null) return dateTimeString;
+
+      return '${parsed.time} ${parsed.meridiem}';
     } catch (e) {
       debugPrint('Error formatting datetime: $dateTimeString, Error: $e');
       return dateTimeString;
     }
+  }
+
+  static String formatTimeRange({
+    required String startTime,
+    required String endTime,
+    BuildContext? context,
+  }) {
+    try {
+      if (startTime.trim().isEmpty && endTime.trim().isEmpty) {
+        return '--';
+      }
+
+      final localeCode = Get.locale?.languageCode ??
+          (context != null
+              ? Localizations.localeOf(context).languageCode
+              : 'en');
+      final isArabic = localeCode == 'ar';
+
+      final start = _parseTimeComponents(startTime, isArabic: isArabic);
+      final end = _parseTimeComponents(endTime, isArabic: isArabic);
+
+      if (start == null && end == null) return '--';
+      if (start == null) return '${end!.time} ${end.meridiem}';
+      if (end == null) return '${start.time} ${start.meridiem}';
+
+      if (start.meridiem == end.meridiem) {
+        return '${start.time} - ${end.time} ${end.meridiem}';
+      }
+
+      return '${start.time} ${start.meridiem} - ${end.time} ${end.meridiem}';
+    } catch (e) {
+      debugPrint(
+        'Error formatting time range: $startTime - $endTime, Error: $e',
+      );
+      return '$startTime - $endTime';
+    }
+  }
+
+  static ({String time, String meridiem})? _parseTimeComponents(
+    String dateTimeString, {
+    required bool isArabic,
+  }) {
+    final match = RegExp(
+      r'(\d{1,2})(?::(\d{2}))?(?::(\d{2}))?\s*(AM|PM|ص|م)?',
+      caseSensitive: false,
+    ).firstMatch(dateTimeString);
+
+    if (match == null) return null;
+
+    int hour = int.parse(match.group(1)!);
+    final minute = int.parse(match.group(2) ?? '0');
+    final meridiemMarker = match.group(4)?.toLowerCase();
+
+    bool isPm = false;
+    if (meridiemMarker == 'pm' || meridiemMarker == 'م') {
+      isPm = true;
+    } else if (meridiemMarker == 'am' || meridiemMarker == 'ص') {
+      isPm = false;
+    } else if (hour >= 12) {
+      isPm = true;
+    }
+
+    if (isPm && hour < 12) {
+      hour += 12;
+    } else if (!isPm && hour == 12) {
+      hour = 0;
+    }
+
+    final displayHour = hour % 12 == 0 ? 12 : (hour % 12);
+    final meridiem = isArabic ? (isPm ? 'م' : 'ص') : (isPm ? 'PM' : 'AM');
+
+    return (
+      time:
+          '${displayHour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}',
+      meridiem: meridiem,
+    );
   }
 
   static String formatAssignmentDueDate(

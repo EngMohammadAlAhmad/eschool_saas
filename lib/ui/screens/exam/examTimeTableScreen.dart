@@ -118,7 +118,7 @@ class _ExamTimeTableState extends State<ExamTimeTableScreen> {
                               horizontal: 3,
                             ),
                             child: Text(
-                              '${examTimeTable.totalMarks} ${Utils.getTranslatedLabel(marksKey)}', //
+                              '${examTimeTable.totalMarks} ${Utils.getTranslatedLabel(finalMarkKey)}', //
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -156,11 +156,16 @@ class _ExamTimeTableState extends State<ExamTimeTableScreen> {
                                 fontSize: 12.0,
                               ),
                             ),
+                      const SizedBox(height: 8.0),
                       examTimeTable.startingTime == '' &&
                               examTimeTable.endingTime == ''
                           ? const SizedBox()
                           : Text(
-                              '${Utils.formatApiDateTime(examTimeTable.startingTime!)} - ${Utils.formatApiDateTime(examTimeTable.endingTime!)}',
+                              Utils.formatTimeRange(
+                                startTime: examTimeTable.startingTime!,
+                                endTime: examTimeTable.endingTime!,
+                                context: context,
+                              ),
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.onSurface,
                                 fontWeight: FontWeight.w400,
@@ -262,10 +267,10 @@ class _ExamTimeTableState extends State<ExamTimeTableScreen> {
             clipBehavior: Clip.none,
             children: [
               Align(
-                alignment: Alignment.topLeft,
+                alignment: AlignmentDirectional.topStart,
                 child: Padding(
-                  padding: EdgeInsets.only(
-                    left: Utils.screenContentHorizontalPadding,
+                  padding: EdgeInsetsDirectional.only(
+                    start: Utils.screenContentHorizontalPadding,
                   ),
                   child: SvgButton(
                     onTap: () {

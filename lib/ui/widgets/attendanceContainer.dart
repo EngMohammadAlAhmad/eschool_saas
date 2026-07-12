@@ -2,21 +2,23 @@ import 'package:eschool/cubits/attendanceCubit.dart';
 import 'package:eschool/cubits/authCubit.dart';
 import 'package:eschool/data/models/attendanceDay.dart';
 import 'package:eschool/ui/widgets/changeCalendarMonthButton.dart';
-import 'package:eschool/ui/widgets/customBackButton.dart';
 import 'package:eschool/ui/widgets/customShimmerContainer.dart';
 import 'package:eschool/ui/widgets/errorContainer.dart';
 import 'package:eschool/ui/widgets/screenTopBackgroundContainer.dart';
 import 'package:eschool/ui/widgets/shimmerLoadingContainer.dart';
-
 import 'package:eschool/utils/labelKeys.dart';
 import 'package:eschool/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class AttendanceContainer extends StatefulWidget {
   final int? childId;
-  const AttendanceContainer({Key? key, this.childId}) : super(key: key);
+  final VoidCallback? onBackPressed;
+  const AttendanceContainer({Key? key, this.childId, this.onBackPressed})
+      : super(key: key);
 
   @override
   State<AttendanceContainer> createState() => _AttendanceContainerState();
@@ -35,7 +37,7 @@ class _AttendanceContainerState extends State<AttendanceContainer> {
   @override
   void initState() {
     Future.delayed(Duration.zero, () {
-      //fetch attendacne
+      //fetch attendance
       context.read<AttendanceCubit>().fetchAttendance(
             month: DateTime.now().month,
             year: DateTime.now().year,
@@ -50,6 +52,49 @@ class _AttendanceContainerState extends State<AttendanceContainer> {
   bool _disableChangeNextMonthButton() {
     return focusedDay.year == DateTime.now().year &&
         focusedDay.month == DateTime.now().month;
+  }
+
+  void _handleBackNavigation() {
+    if (widget.onBackPressed != null) {
+      widget.onBackPressed!.call();
+      return;
+    }
+
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    Get.back();
+  }
+
+  Widget _buildBackButton() {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        if (widget.onBackPressed != null) {
+          widget.onBackPressed!.call();
+        } else {
+          _handleBackNavigation();
+        }
+      },
+      child: Padding(
+        padding: EdgeInsetsDirectional.only(
+          start: Utils.screenContentHorizontalPadding,
+        ),
+        child: SizedBox(
+          width: 28,
+          height: 28,
+          child: SvgPicture.asset(
+            Utils.getBackButtonPath(context),
+            colorFilter: ColorFilter.mode(
+              Theme.of(context).scaffoldBackgroundColor,
+              BlendMode.srcIn,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildShimmerAttendanceCounterContainer(
@@ -120,9 +165,10 @@ class _AttendanceContainerState extends State<AttendanceContainer> {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          context.read<AuthCubit>().isParent()
-              ? const CustomBackButton()
-              : const SizedBox(),
+          Align(
+            alignment: AlignmentDirectional.topStart,
+            child: _buildBackButton(),
+          ),
           Align(
             alignment: Alignment.topCenter,
             child: Text(
@@ -234,9 +280,11 @@ class _AttendanceContainerState extends State<AttendanceContainer> {
         ),
         margin: const EdgeInsets.only(top: 20),
         child: TableCalendar(
+          locale: Get.locale?.languageCode ??
+              Localizations.localeOf(context).languageCode,
+          startingDayOfWeek: StartingDayOfWeek.sunday,
           headerVisible: false,
           daysOfWeekHeight: 40,
-
           onPageChanged: (DateTime dateTime) {
             setState(() {
               focusedDay = dateTime;

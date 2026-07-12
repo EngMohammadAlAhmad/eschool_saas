@@ -211,8 +211,7 @@ class _AssignmentsContainerState extends State<AssignmentsContainer> {
                   );
                 },
               ),
-              BlocBuilder<AssignmentsTabSelectionCubit,
-                  AssignmentsTabSelectionState>(
+              BlocBuilder<AssignmentsTabSelectionCubit, AssignmentsTabSelectionState>(
                 bloc: context.read<AssignmentsTabSelectionCubit>(),
                 builder: (context, state) {
                   return CustomTabBarContainer(
@@ -225,12 +224,11 @@ class _AssignmentsContainerState extends State<AssignmentsContainer> {
                           .changeAssignmentFilterTabTitle(assignedKey);
                       fetchAssignments();
                     },
-                    titleKey: assignedKey,
+                    titleKey: assignedHomeWKey,
                   );
                 },
               ),
-              BlocBuilder<AssignmentsTabSelectionCubit,
-                  AssignmentsTabSelectionState>(
+              BlocBuilder<AssignmentsTabSelectionCubit, AssignmentsTabSelectionState>(
                 bloc: context.read<AssignmentsTabSelectionCubit>(),
                 builder: (context, state) {
                   return CustomTabBarContainer(
@@ -243,7 +241,7 @@ class _AssignmentsContainerState extends State<AssignmentsContainer> {
                           .changeAssignmentFilterTabTitle(submittedKey);
                       fetchAssignments();
                     },
-                    titleKey: submittedKey,
+                    titleKey: submittedHomeWKey,
                   );
                 },
               ),

@@ -8,6 +8,7 @@ import 'package:eschool/ui/widgets/customShimmerContainer.dart';
 import 'package:eschool/ui/widgets/errorContainer.dart';
 import 'package:eschool/ui/widgets/screenTopBackgroundContainer.dart';
 import 'package:eschool/ui/widgets/shimmerLoadingContainer.dart';
+import 'package:eschool/ui/widgets/svgButton.dart';
 import 'package:eschool/utils/animationConfiguration.dart';
 import 'package:eschool/utils/constants.dart';
 import 'package:eschool/utils/labelKeys.dart';
@@ -15,11 +16,14 @@ import 'package:eschool/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class HolidaysContainer extends StatefulWidget {
   final int? childId;
-  const HolidaysContainer({Key? key, this.childId}) : super(key: key);
+  final VoidCallback? onBackPressed;
+  const HolidaysContainer({Key? key, this.childId, this.onBackPressed})
+      : super(key: key);
 
   @override
   State<HolidaysContainer> createState() => _HolidaysContainerState();
@@ -41,6 +45,20 @@ class _HolidaysContainerState extends State<HolidaysContainer> {
       context.read<HolidaysCubit>().fetchHolidays(childId: widget.childId);
     });
     super.initState();
+  }
+
+  void _handleBackNavigation() {
+    if (widget.onBackPressed != null) {
+      widget.onBackPressed!.call();
+      return;
+    }
+
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    Get.back();
   }
 
   void updateMonthViceHolidays() {
@@ -142,6 +160,8 @@ class _HolidaysContainerState extends State<HolidaysContainer> {
       ),
       margin: const EdgeInsets.only(top: 20),
       child: TableCalendar(
+        locale: Get.locale?.languageCode ??
+            Localizations.localeOf(context).languageCode,
         headerVisible: false,
         daysOfWeekHeight: 40,
         onPageChanged: (DateTime dateTime) {
@@ -172,7 +192,7 @@ class _HolidaysContainerState extends State<HolidaysContainer> {
               TextStyle(color: Theme.of(context).scaffoldBackgroundColor),
           holidayDecoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Theme.of(context).colorScheme.primary,
+            color: Colors.green,
           ),
         ),
         daysOfWeekStyle: DaysOfWeekStyle(
@@ -283,9 +303,7 @@ class _HolidaysContainerState extends State<HolidaysContainer> {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          context.read<AuthCubit>().isParent()
-              ? const CustomBackButton()
-              : const SizedBox(),
+          CustomBackButton(onTap: _handleBackNavigation),
           Align(
             alignment: Alignment.topCenter,
             child: Text(
@@ -293,6 +311,18 @@ class _HolidaysContainerState extends State<HolidaysContainer> {
               style: TextStyle(
                 color: Theme.of(context).scaffoldBackgroundColor,
                 fontSize: Utils.screenTitleFontSize,
+              ),
+            ),
+          ),
+          Align(
+            alignment: AlignmentDirectional.topStart,
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(
+                start: Utils.screenContentHorizontalPadding,
+              ),
+              child: SvgButton(
+                onTap: _handleBackNavigation,
+                svgIconUrl: Utils.getBackButtonPath(context),
               ),
             ),
           ),

@@ -161,6 +161,8 @@ const String logoutKey = "logout";
 const String appVersionKey = "appVersion";
 const String assignedKey = "assigned";
 const String submittedKey = "submitted";
+const String assignedHomeWKey = "assignedHomeW";
+const String submittedHomeWKey = "submittedHomeW";
 const String sortByKey = "sortBy";
 const String assignedDateLatestKey = "assignedDateLatest";
 const String assignedDateOldestKey = "assignedDateOldest";
@@ -239,6 +241,7 @@ const String phoneNumberKey = "phoneNumber";
 const String resultKey = "result";
 const String subKey = "sub";
 const String marksKey = "marks";
+const String finalMarkKey = "finalMark";
 const String totalKey = "total";
 
 const String totalFeeKey = "totalFee";

@@ -100,7 +100,7 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
     VoidCallback? onTap,
   }) {
     final Widget content = Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
           padding: const EdgeInsets.all(12.5),
@@ -119,9 +119,10 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
           ),
           child: SvgPicture.asset(
             iconUrl,
+            fit: iconUrl.contains('phone_icon') ? BoxFit.cover : BoxFit.contain,
             theme: SvgTheme(
                 currentColor:
-                    iconColor ?? Theme.of(context).scaffoldBackgroundColor),
+                iconColor ?? Theme.of(context).scaffoldBackgroundColor),
             colorFilter: iconColor == null
                 ? null
                 : ColorFilter.mode(iconColor, BlendMode.srcIn),
@@ -135,6 +136,7 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
             padding: const EdgeInsets.only(top: 3.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 5.0,
               children: [
                 Text(
                   label,
@@ -163,10 +165,10 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
       padding: const EdgeInsets.symmetric(vertical: 14.0),
       child: onTap != null
           ? InkWell(
-              onTap: onTap,
-              borderRadius: BorderRadius.circular(15.0),
-              child: content,
-            )
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(15.0),
+        child: content,
+      )
           : content,
     );
   }
@@ -264,15 +266,15 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
         // Only show logout button when viewing own profile (not parent viewing child)
         trailingWidget: widget.childId == null
             ? GestureDetector(
-                onTap: _showLogoutDialog,
-                child: SizedBox(
-                  height: 22.0,
-                  width: 22.0,
-                  child: SvgPicture.asset(
-                    Utils.getImagePath("logout_icon.svg"),
-                  ),
-                ),
-              )
+          onTap: _showLogoutDialog,
+          child: SizedBox(
+            height: 22.0,
+            width: 22.0,
+            child: SvgPicture.asset(
+              Utils.getImagePath("logout_icon.svg"),
+            ),
+          ),
+        )
             : null,
       ),
     );
@@ -396,37 +398,37 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
                     iconUrl: Utils.getImagePath("user_pro_class_icon.svg"),
                   ),
                   (studentDetails.classSection?.classDetails
-                                  ?.includeSemesters ??
-                              0) ==
-                          1
+                      ?.includeSemesters ??
+                      0) ==
+                      1
                       ? _buildProfileDetailsTile(
-                          label: Utils.getTranslatedLabel(semesterKey),
-                          value: Utils.formatEmptyValue(
-                            context
-                                    .read<SchoolConfigurationCubit>()
-                                    .getSchoolConfiguration()
-                                    .semesterDetails
-                                    .name ??
-                                "",
-                          ),
-                          iconColor: Theme.of(context).scaffoldBackgroundColor,
-                          iconUrl: Utils.getImagePath("sem_pro_icon.svg"),
-                        )
+                    label: Utils.getTranslatedLabel(semesterKey),
+                    value: Utils.formatEmptyValue(
+                      context
+                          .read<SchoolConfigurationCubit>()
+                          .getSchoolConfiguration()
+                          .semesterDetails
+                          .name ??
+                          "",
+                    ),
+                    iconColor: Theme.of(context).scaffoldBackgroundColor,
+                    iconUrl: Utils.getImagePath("sem_pro_icon.svg"),
+                  )
                       : const SizedBox(),
                   (studentDetails.classSection?.classDetails?.streamDetails
-                                  ?.name ??
-                              "")
-                          .isNotEmpty
+                      ?.name ??
+                      "")
+                      .isNotEmpty
                       ? _buildProfileDetailsTile(
-                          label: Utils.getTranslatedLabel(streamKey),
-                          value: Utils.formatEmptyValue(
-                            studentDetails.classSection?.classDetails
-                                    ?.streamDetails?.name ??
-                                "",
-                          ),
-                          iconColor: Theme.of(context).scaffoldBackgroundColor,
-                          iconUrl: Utils.getImagePath("stream_pro_icon.svg"),
-                        )
+                    label: Utils.getTranslatedLabel(streamKey),
+                    value: Utils.formatEmptyValue(
+                      studentDetails.classSection?.classDetails
+                          ?.streamDetails?.name ??
+                          "",
+                    ),
+                    iconColor: Theme.of(context).scaffoldBackgroundColor,
+                    iconUrl: Utils.getImagePath("stream_pro_icon.svg"),
+                  )
                       : const SizedBox(),
                   _buildProfileDetailsTile(
                     label: Utils.getTranslatedLabel(mediumKey),
@@ -436,9 +438,9 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
                     iconUrl: Utils.getImagePath("medium_icon.svg"),
                   ),
                   if (studentDetails.classSection?.classDetails?.shift?.name !=
-                          null &&
+                      null &&
                       (studentDetails.classSection?.classDetails?.shift?.name ??
-                              "")
+                          "")
                           .trim()
                           .isNotEmpty)
                     _buildProfileDetailsTile(
@@ -477,7 +479,7 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
                     iconUrl: Utils.getImagePath("user_pro_address_icon.svg"),
                   ),
                   ...(studentDetails.studentProfileExtraDetails ?? []).map(
-                    (details) {
+                        (details) {
                       final fieldType = details.formField?.type;
                       final isFileType = fieldType?.toLowerCase() == 'file';
                       final fileUrl = details.fileUrl ?? '';
@@ -487,16 +489,16 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
                         value: isFileType && fileUrl.isNotEmpty
                             ? Utils.getTranslatedLabel(tapToViewFileKey)
                             : _formatFieldValue(
-                                details.data,
-                                fieldType,
-                              ),
+                          details.data,
+                          fieldType,
+                        ),
                         iconColor: Theme.of(context).scaffoldBackgroundColor,
                         iconUrl: Utils.getIconForFieldType(fieldType),
                         onTap: isFileType && fileUrl.isNotEmpty
                             ? () => _openFile(
-                                  fileUrl,
-                                  details.formField?.name ?? 'File',
-                                )
+                          fileUrl,
+                          details.formField?.name ?? 'File',
+                        )
                             : null,
                       );
                     },

@@ -1,17 +1,22 @@
 import 'package:eschool/cubits/studentGuardianDetailsCubit.dart';
 import 'package:eschool/ui/styles/colors.dart';
+import 'package:eschool/ui/widgets/customBackButton.dart';
 import 'package:eschool/ui/widgets/customShimmerContainer.dart';
 import 'package:eschool/ui/widgets/errorContainer.dart';
 import 'package:eschool/ui/widgets/guardianDetailsContainer.dart';
 import 'package:eschool/ui/widgets/screenTopBackgroundContainer.dart';
 import 'package:eschool/ui/widgets/shimmerLoadingContainer.dart';
+import 'package:eschool/ui/widgets/svgButton.dart';
 import 'package:eschool/utils/labelKeys.dart';
 import 'package:eschool/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 
 class GuardianProfileContainer extends StatefulWidget {
-  const GuardianProfileContainer({Key? key}) : super(key: key);
+  final VoidCallback? onBackPressed;
+  const GuardianProfileContainer({Key? key, this.onBackPressed})
+      : super(key: key);
 
   @override
   State<GuardianProfileContainer> createState() =>
@@ -29,6 +34,20 @@ class _GuardianProfileContainerState extends State<GuardianProfileContainer> {
     Future.delayed(Duration.zero, () {
       context.read<StudentGuardianDetailsCubit>().getStudentGuardianDetails();
     });
+  }
+
+  void _handleBackNavigation() {
+    if (widget.onBackPressed != null) {
+      widget.onBackPressed!.call();
+      return;
+    }
+
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    Get.back();
   }
 
   Widget _buildGuardianDetailsValueShimmerLoading(
@@ -123,6 +142,18 @@ class _GuardianProfileContainerState extends State<GuardianProfileContainer> {
               style: TextStyle(
                 color: Theme.of(context).scaffoldBackgroundColor,
                 fontSize: Utils.screenTitleFontSize,
+              ),
+            ),
+          ),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(
+                start: Utils.screenContentHorizontalPadding,
+              ),
+              child: SvgButton(
+                onTap: _handleBackNavigation,
+                svgIconUrl: Utils.getBackButtonPath(context),
               ),
             ),
           ),

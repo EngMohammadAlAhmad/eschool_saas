@@ -154,10 +154,8 @@ class _DiaryReportCardState extends State<DiaryReportCard> {
                 else
                   ...List.generate(_activeCategories.length, (index) {
                     final cat = _activeCategories[index];
-                    final pct =
-                        double.tryParse(cat.percentage.toString()) ?? 0.0;
-                    final color =
-                        _categoryBarColors[index % _categoryBarColors.length];
+                    final pct = double.tryParse(cat.percentage.toString()) ?? 0.0;
+                    final color = _categoryBarColors[index % _categoryBarColors.length];
                     return ReportProgressBarRow(
                       label: "${cat.categoryName ?? ''} (${cat.count ?? 0})",
                       value: "${pct.toStringAsFixed(0)}%",
