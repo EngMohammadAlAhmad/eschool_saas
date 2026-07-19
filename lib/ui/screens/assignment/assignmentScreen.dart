@@ -372,8 +372,7 @@ class _AssignmentScreenState extends State<AssignmentScreen> {
     //Since dueDate is now a string from API, we'll always use the raw date string
     //For resubmission cases, we'll show the original due date with a note about extra days
     if ((assignmentStatusKey == rejectedKey &&
-            submittedAssignment.resubmission == 1) ||
-        assignmentStatusKey == resubmittedKey) {
+        submittedAssignment.resubmission == 1) || assignmentStatusKey == resubmittedKey) {
       dueDateToDisplay =
           "${submittedAssignment.dueDateOriginal} (+${submittedAssignment.extraDaysForResubmission} days for resubmission)";
     } else {

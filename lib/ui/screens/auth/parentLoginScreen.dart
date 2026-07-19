@@ -152,7 +152,7 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
             });
           },
           child: Text(
-            "${Utils.getTranslatedLabel(forgotPasswordKey)}?",
+            Utils.getTranslatedLabel(forgotPasswordKey),
             style: TextStyle(color: Theme.of(context).colorScheme.primary),
           ),
         ),
@@ -258,6 +258,8 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
                         suffixWidget: Padding(
                           padding: const EdgeInsets.all(12.0),
                           child: SvgPicture.asset(
+                            height: 18.0,
+                            width: 18.0,
                             Utils.getImagePath("mail_icon.svg"),
                             colorFilter: ColorFilter.mode(
                               Utils.getColorScheme(context).secondary,
@@ -374,14 +376,13 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
                                 }
                                 Get.offNamed(Routes.studentLogin);
                               },
-                              child: RichText(
-                                text: TextSpan(
+                              child: Text.rich(
+                                TextSpan(
                                   children: [
                                     TextSpan(
                                       style: TextStyle(
                                         fontSize: 16.0,
-                                        color: Utils.getColorScheme(context)
-                                            .primary,
+                                        color: Utils.getColorScheme(context).primary,
                                       ),
                                       text: Utils.getTranslatedLabel(
                                         loginAsKey,
@@ -395,8 +396,7 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
                                         color: Utils.getColorScheme(context)
                                             .secondary,
                                       ),
-                                      text:
-                                          "${Utils.getTranslatedLabel(studentKey)}?",
+                                      text: Utils.getTranslatedLabel(studentKey),
                                     ),
                                   ],
                                 ),

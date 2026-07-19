@@ -1,3 +1,4 @@
+import 'package:eschool/utils/labelKeys.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -41,7 +42,7 @@ class _TransportAttendanceScreenState extends State<TransportAttendanceScreen>
 
   PageController? calendarPageController;
   String selectedTripType = 'pickup';
-  late String _selectedTabTitle = 'Pickup Trip';
+  late String _selectedTabTitle = Utils.getTranslatedLabel(pickupTripKey);
 
   @override
   void initState() {
@@ -63,7 +64,7 @@ class _TransportAttendanceScreenState extends State<TransportAttendanceScreen>
       setState(() {
         selectedTripType = _tabController.index == 0 ? 'pickup' : 'drop';
         _selectedTabTitle =
-            _tabController.index == 0 ? 'Pickup Trip' : 'Drop Trip';
+            _tabController.index == 0 ? Utils.getTranslatedLabel(pickupTripKey) : Utils.getTranslatedLabel(dropTripKey);
       });
       _fetchAttendance();
     }
@@ -265,7 +266,7 @@ class _TransportAttendanceScreenState extends State<TransportAttendanceScreen>
                   alignment: Alignment.topCenter,
                   width: boxConstraints.maxWidth * (0.5),
                   child: Text(
-                    'Transportation Attendance',
+                    Utils.getTranslatedLabel(transportationAttendanceKey),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -278,7 +279,7 @@ class _TransportAttendanceScreenState extends State<TransportAttendanceScreen>
               AnimatedAlign(
                 curve: Utils.tabBackgroundContainerAnimationCurve,
                 duration: Utils.tabBackgroundContainerAnimationDuration,
-                alignment: _selectedTabTitle == 'Pickup Trip'
+                alignment: _selectedTabTitle == Utils.getTranslatedLabel(pickupTripKey)
                     ? AlignmentDirectional.centerStart
                     : AlignmentDirectional.centerEnd,
                 child:
@@ -287,30 +288,30 @@ class _TransportAttendanceScreenState extends State<TransportAttendanceScreen>
               CustomTabBarContainer(
                 boxConstraints: boxConstraints,
                 alignment: AlignmentDirectional.centerStart,
-                isSelected: _selectedTabTitle == 'Pickup Trip',
+                isSelected: _selectedTabTitle == Utils.getTranslatedLabel(pickupTripKey),
                 onTap: () {
                   setState(() {
-                    _selectedTabTitle = 'Pickup Trip';
+                    _selectedTabTitle = Utils.getTranslatedLabel(pickupTripKey);
                     selectedTripType = 'pickup';
                   });
                   _tabController.animateTo(0);
                   _fetchAttendance();
                 },
-                titleKey: 'Pickup Trip',
+                titleKey: Utils.getTranslatedLabel(pickupTripKey),
               ),
               CustomTabBarContainer(
                 boxConstraints: boxConstraints,
                 alignment: AlignmentDirectional.centerEnd,
-                isSelected: _selectedTabTitle == 'Drop Trip',
+                isSelected: _selectedTabTitle == Utils.getTranslatedLabel(dropTripKey),
                 onTap: () {
                   setState(() {
-                    _selectedTabTitle = 'Drop Trip';
+                    _selectedTabTitle = Utils.getTranslatedLabel(dropTripKey);
                     selectedTripType = 'drop';
                   });
                   _tabController.animateTo(1);
                   _fetchAttendance();
                 },
-                titleKey: 'Drop Trip',
+                titleKey: Utils.getTranslatedLabel(dropTripKey),
               ),
             ],
           );
@@ -343,8 +344,11 @@ class _TransportAttendanceScreenState extends State<TransportAttendanceScreen>
         ),
         margin: const EdgeInsets.only(top: 20),
         child: TableCalendar(
+          locale: Get.locale?.languageCode ??
+              Localizations.localeOf(context).languageCode,
           headerVisible: false,
           daysOfWeekHeight: 40,
+
           onPageChanged: onMonthChanged,
           onCalendarCreated: (controller) {
             calendarPageController = controller;
@@ -409,7 +413,7 @@ class _TransportAttendanceScreenState extends State<TransportAttendanceScreen>
     } catch (e) {
       return Container(
         padding: const EdgeInsets.all(20),
-        child: Text('Error loading calendar: $e'),
+        child: Text('${Utils.getTranslatedLabel(errorLoadingCalendarKey)}: $e'),
       );
     }
   }
@@ -523,14 +527,14 @@ class _TransportAttendanceScreenState extends State<TransportAttendanceScreen>
           children: [
             _buildAttendanceCounterContainer(
               boxConstraints: boxConstraints,
-              title: 'Total Present',
+              title: Utils.getTranslatedLabel(totalPresentKey),
               value: presentCount.toString(),
               backgroundColor: Theme.of(context).colorScheme.onPrimary,
             ),
             const Spacer(),
             _buildAttendanceCounterContainer(
               boxConstraints: boxConstraints,
-              title: 'Total Absent',
+              title: Utils.getTranslatedLabel(totalAbsentKey),
               value: absentCount.toString(),
               backgroundColor: Theme.of(context).colorScheme.error,
             ),

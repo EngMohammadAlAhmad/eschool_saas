@@ -10,7 +10,6 @@ import 'package:eschool/ui/widgets/customCircularProgressIndicator.dart';
 import 'package:eschool/ui/widgets/errorContainer.dart';
 import 'package:eschool/ui/widgets/noDataContainer.dart';
 import 'package:eschool/ui/widgets/screenTopBackgroundContainer.dart';
-import 'package:eschool/ui/widgets/svgButton.dart';
 import 'package:eschool/utils/labelKeys.dart';
 import 'package:eschool/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +37,9 @@ class _SchoolGalleryWithSessionYearFilterContainerState
     extends State<SchoolGalleryWithSessionYearFilterContainer> {
   SessionYear selectedSessionYear = SessionYear();
   List<SessionYear> sessionYears = [];
+
+  // Added state to control the custom dropdown visibility
+  bool _isDropdownOpen = false;
 
   @override
   void initState() {
@@ -75,73 +77,178 @@ class _SchoolGalleryWithSessionYearFilterContainerState
 
   Widget _buildSessionYearDropDown() {
     final sessionYearNameTextStyle =
-        TextStyle(fontSize: 16.0, color: Theme.of(context).colorScheme.primary);
-    return Container(
-      padding: EdgeInsets.symmetric(
-          horizontal: Utils.screenContentHorizontalPadding),
-      alignment: AlignmentDirectional.centerStart,
-      width: MediaQuery.of(context).size.width,
-      height: 50,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.32)),
-      child: BlocConsumer<SchoolSessionYearsCubit, SchoolSessionYearsState>(
-          listener: (context, state) {
+    TextStyle(fontSize: 16.0, color: Theme.of(context).colorScheme.primary);
+
+    return BlocConsumer<SchoolSessionYearsCubit, SchoolSessionYearsState>(
+      listener: (context, state) {
         if (state is SchoolSessionYearsFetchSuccess) {
           sessionYears = state.sessionYears;
-          selectedSessionYear =
-              sessionYears.firstWhere((element) => element.isDefault == 1);
+          if (sessionYears.isNotEmpty) {
+            selectedSessionYear = sessionYears.firstWhere(
+                    (element) => element.isDefault == 1,
+                orElse: () => sessionYears.first);
+          }
           setState(() {});
           fetchSchoolGallerySessionYearWise();
         }
-        //
-      }, builder: (context, state) {
-        if (state is SchoolSessionYearsFetchSuccess) {
-          return DropdownButton<SessionYear>(
-              iconEnabledColor: Theme.of(context).colorScheme.primary,
-              isExpanded: true,
-              value: selectedSessionYear,
-              items: sessionYears
-                  .map((sessionYear) => DropdownMenuItem<SessionYear>(
-                      value: sessionYear,
-                      child: Text(
-                        sessionYear.name ?? "",
-                        style: sessionYearNameTextStyle,
-                      )))
-                  .toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  selectedSessionYear = value;
-                  setState(() {});
-                  fetchSchoolGallerySessionYearWise();
-                }
-              });
-        }
-
+      },
+      builder: (context, state) {
+        // Failure State
         if (state is SchoolSessionYearsFetchFailure) {
-          return Row(
-            children: [
-              Text(
-                Utils.getTranslatedLabel(failedToGetSessionYearsKey),
-                style: TextStyle(color: Theme.of(context).colorScheme.primary),
-              ),
-              const Spacer(),
-              IconButton(
-                  onPressed: () {
-                    fetchSessionYears();
-                  },
+          return Container(
+            padding: EdgeInsets.symmetric(
+                horizontal: Utils.screenContentHorizontalPadding),
+            height: 50,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.0),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.32),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    Utils.getTranslatedLabel(failedToGetSessionYearsKey),
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary),
+                  ),
+                ),
+                IconButton(
+                  onPressed: fetchSessionYears,
                   icon: Icon(
                     Icons.refresh,
                     color: Theme.of(context).colorScheme.primary,
-                  ))
-            ],
+                  ),
+                )
+              ],
+            ),
           );
         }
-        return Text(
-          Utils.getTranslatedLabel(fetchingSessionYearsKey),
-          style: sessionYearNameTextStyle,
+
+        // Loading State
+        if (state is! SchoolSessionYearsFetchSuccess) {
+          return Container(
+            padding: EdgeInsets.symmetric(horizontal: Utils.screenContentHorizontalPadding),
+            height: 50.0,
+            alignment: AlignmentDirectional.centerStart,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.32),
+            ),
+            child: Text(
+              Utils.getTranslatedLabel(fetchingSessionYearsKey),
+              style: sessionYearNameTextStyle,
+            ),
+          );
+        }
+
+        // Success State: Custom Expandable Dropdown
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 1. The Trigger Button
+            InkWell(
+              onTap: () {
+                setState(() {
+                  _isDropdownOpen = !_isDropdownOpen;
+                });
+              },
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: Utils.screenContentHorizontalPadding),
+                height: 50.0,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(10.0),
+                    bottom: _isDropdownOpen ? Radius.zero : Radius.circular(10.0),
+                  ),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.32),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        selectedSessionYear.name ?? "",
+                        style: sessionYearNameTextStyle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Icon(
+                      _isDropdownOpen
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // 2. The Dropdown List (Only visible when open)
+            if (_isDropdownOpen && sessionYears.isNotEmpty)
+              Container(
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(10.0)),
+                  color: Theme.of(context).colorScheme.surface,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  padding: EdgeInsets.zero,
+                  itemCount: sessionYears.length,
+                  itemBuilder: (context, index) {
+                    final sessionYear = sessionYears[index];
+                    final isSelected = selectedSessionYear.id == sessionYear.id;
+
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          selectedSessionYear = sessionYear;
+                          _isDropdownOpen = false; // Close after selection
+                        });
+                        fetchSchoolGallerySessionYearWise();
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: Utils.screenContentHorizontalPadding,
+                          vertical: 16,
+                        ),
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
+                            : Colors.transparent,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                sessionYear.name ?? "",
+                                style: sessionYearNameTextStyle.copyWith(
+                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                ),
+                              ),
+                            ),
+                            if (isSelected)
+                              Icon(
+                                Icons.check,
+                                color: Theme.of(context).colorScheme.primary,
+                                size: 20,
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+          ],
         );
-      }),
+      },
     );
   }
 
@@ -164,20 +271,6 @@ class _SchoolGalleryWithSessionYearFilterContainerState
               ),
             ),
           ),
-          widget.showBackButton
-              ? Align(
-                  alignment: AlignmentDirectional.topStart,
-                  child: Padding(
-                    padding: EdgeInsetsDirectional.only(
-                      start: Utils.screenContentHorizontalPadding,
-                    ),
-                    child: SvgButton(
-                      onTap: _handleBackNavigation,
-                      svgIconUrl: Utils.getBackButtonPath(context),
-                    ),
-                  ),
-                )
-              : const SizedBox(),
         ],
       ),
     );
@@ -189,140 +282,138 @@ class _SchoolGalleryWithSessionYearFilterContainerState
       children: [
         Column(
           children: [
-            SingleChildScrollView(
-              padding: EdgeInsets.only(
-                  bottom: 80,
-                  left: Utils.screenContentHorizontalPadding,
-                  right: Utils.screenContentHorizontalPadding,
-                  top: Utils.getScrollViewTopPadding(
-                      context: context,
-                      appBarHeightPercentage:
-                          Utils.appBarSmallerHeightPercentage)),
-              child: Column(
-                children: [
-                  BlocBuilder<SchoolGalleryCubit, SchoolGalleryState>(
-                    builder: (context, state) {
-                      if (state is SchoolGalleryFetchSuccess) {
-                        if (state.gallery.isEmpty) {
-                          return Center(
-                              child: Center(
-                            child: NoDataContainer(
-                                titleKey:
-                                    noGalleryDataAvailableForThisSessionKey),
-                          ));
-                        }
-
-                        return Column(
-                          children: state.gallery.reversed.map((gallery) {
-                            final photosAndVideosCountTextStyle = TextStyle(
-                                fontSize: 12.0,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .secondary
-                                    .withValues(alpha: 0.65));
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    Get.toNamed(Routes.galleryDetails,
-                                        arguments: {
-                                          "gallery": gallery,
-                                          "sessionYear": selectedSessionYear
-                                        });
-                                  },
-                                  child: Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    height: 175,
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(
-                                          Utils.bottomSheetTopRadius),
-                                      child: gallery.isThumbnailSvg()
-                                          ? SvgPicture.network(
-                                              gallery.thumbnail ?? "",
-                                              fit: BoxFit.cover,
-                                            )
-                                          : CachedNetworkImage(
-                                              imageUrl: gallery.thumbnail ?? "",
-                                              fit: BoxFit.cover,
-                                            ),
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.only(bottom: 5, top: 15),
-                                  child: Text(
-                                    (gallery.title ?? ""),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      height: 1.0,
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 5,
-                                ),
-                                Row(
-                                  children: [
-                                    gallery.getImages().isNotEmpty
-                                        ? Text(
-                                            "${gallery.getImages().length} ${Utils.getTranslatedLabel(gallery.getImages().length == 1 ? photoKey : photosKey)}",
-                                            style:
-                                                photosAndVideosCountTextStyle,
-                                          )
-                                        : const SizedBox(),
-                                    gallery.getVideos().isNotEmpty &&
-                                            gallery.getImages().isNotEmpty
-                                        ? Text(
-                                            " | ",
-                                            style:
-                                                photosAndVideosCountTextStyle,
-                                          )
-                                        : const SizedBox(),
-                                    gallery.getVideos().isNotEmpty
-                                        ? Text(
-                                            "${gallery.getVideos().length} ${Utils.getTranslatedLabel(gallery.getVideos().length == 1 ? videoKey : videosKey)}",
-                                            style:
-                                                photosAndVideosCountTextStyle,
-                                          )
-                                        : const SizedBox(),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 25,
-                                ),
-                              ],
-                            );
-                          }).toList(),
-                        );
-                      }
-                      if (state is SchoolGalleryFetchFailure) {
+            SizedBox(
+              height: Utils.getScrollViewTopPadding(
+                  context: context,
+                  appBarHeightPercentage: Utils.appBarSmallerHeightPercentage),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: Utils.screenContentHorizontalPadding),
+              child: _buildSessionYearDropDown(),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.only(
+                    bottom: 80,
+                    left: Utils.screenContentHorizontalPadding,
+                    right: Utils.screenContentHorizontalPadding),
+                child: BlocBuilder<SchoolGalleryCubit, SchoolGalleryState>(
+                  builder: (context, state) {
+                    if (state is SchoolGalleryFetchSuccess) {
+                      if (state.gallery.isEmpty) {
                         return Center(
-                          child: ErrorContainer(
-                            errorMessageCode: state.errorMessage,
-                            onTapRetry: () {
-                              fetchSchoolGallerySessionYearWise();
-                            },
-                          ),
+                          child: NoDataContainer(
+                              titleKey: noGalleryDataAvailableForThisSessionKey),
                         );
                       }
-                      return Padding(
-                        padding: EdgeInsets.only(
-                            top: MediaQuery.of(context).size.height * (0.3)),
-                        child: Center(
-                          child: CustomCircularProgressIndicator(
-                            indicatorColor:
-                                Theme.of(context).colorScheme.primary,
-                          ),
+
+                      return Column(
+                        children: state.gallery.reversed.map((gallery) {
+                          final photosAndVideosCountTextStyle = TextStyle(
+                              fontSize: 12.0,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .secondary
+                                  .withValues(alpha: 0.65));
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Get.toNamed(Routes.galleryDetails,
+                                      arguments: {
+                                        "gallery": gallery,
+                                        "sessionYear": selectedSessionYear
+                                      });
+                                },
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 175,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(Utils.bottomSheetTopRadius),
+                                    child: gallery.isThumbnailSvg()
+                                        ? SvgPicture.network(
+                                      gallery.thumbnail ?? "",
+                                      fit: BoxFit.cover,
+                                    )
+                                        : CachedNetworkImage(
+                                      imageUrl: gallery.thumbnail ?? "",
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                const EdgeInsets.only(bottom: 5, top: 15),
+                                child: Text(
+                                  (gallery.title ?? ""),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    height: 1.0,
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 5,
+                                child: const SizedBox(),
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    gallery.getImages().isNotEmpty
+                                        ? "${gallery.getImages().length} ${Utils.getTranslatedLabel(gallery.getImages().length == 1 ? photoKey : photosKey)}"
+                                        : "0 ${Utils.getTranslatedLabel(photoKey)}",
+                                    style: photosAndVideosCountTextStyle,
+                                  ),
+                                  Text(
+                                    "   |   ",
+                                    style: photosAndVideosCountTextStyle,
+                                  ),
+                                  Text(
+                                    gallery.getVideos().isNotEmpty
+                                        ? "${gallery.getVideos().length} ${Utils.getTranslatedLabel(gallery.getVideos().length == 1 ? videoKey : videosKey)}"
+                                        : "0 ${Utils.getTranslatedLabel(videoKey)}",
+                                    style: photosAndVideosCountTextStyle,
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: 25,
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      );
+                    }
+                    if (state is SchoolGalleryFetchFailure) {
+                      return Center(
+                        child: ErrorContainer(
+                          errorMessageCode: state.errorMessage,
+                          onTapRetry: () {
+                            fetchSchoolGallerySessionYearWise();
+                          },
                         ),
                       );
-                    },
-                  )
-                ],
+                    }
+                    return Padding(
+                      padding: EdgeInsets.only(
+                          top: MediaQuery.of(context).size.height * (0.3)),
+                      child: Center(
+                        child: CustomCircularProgressIndicator(
+                          indicatorColor: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ],

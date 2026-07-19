@@ -447,21 +447,20 @@ class AttendanceCard extends StatelessWidget {
       children: [
         LabelValue(
           label: pickUpPointKey,
-          value: pickupStopName ?? 'N/A',
+          value: pickupStopName ?? Utils.getTranslatedLabel(naKey),
         ),
         Row(
           children: [
             Expanded(
               child: LabelValue(
                 label: pickupTimeKey,
-                value: pickupTime ?? 'N/A',
+                value: pickupTime ?? Utils.getTranslatedLabel(naKey),
                 smallValueStyle: true,
               ),
             ),
             GestureDetector(
               onTap: () {
-                Get.toNamed(Routes.transportAttendanceScreen,
-                    arguments: studentId);
+                Get.toNamed(Routes.transportAttendanceScreen, arguments: studentId);
               },
               child: IconPill(
                   icon: Icons.event,

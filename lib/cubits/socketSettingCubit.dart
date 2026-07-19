@@ -48,6 +48,11 @@ class SocketSettingCubit extends Cubit<SocketSettingState> {
   }
 
   void _connect() {
+    if (reverbUrl == "YOUR_REVERB_URL_HERE" ||
+        (!reverbUrl.startsWith("ws://") && !reverbUrl.startsWith("wss://"))) {
+      log('[Reverb] WebSocket URL not configured or invalid. Skipping connection.');
+      return;
+    }
     try {
       _channel = WebSocketChannel.connect(
         Uri.parse(reverbUrl),

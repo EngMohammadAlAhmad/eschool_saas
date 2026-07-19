@@ -25,6 +25,8 @@ class PasswordHideShowButton extends StatelessWidget {
           Utils.getImagePath(
             hidePassword ? "hide_password.svg" : "show_password.svg",
           ),
+          height: 20.0,
+          width: 20.0,
           colorFilter: ColorFilter.mode(
               Utils.getColorScheme(context).secondary, BlendMode.srcIn),
         ),

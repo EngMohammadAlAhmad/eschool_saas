@@ -195,23 +195,23 @@ class _TransportPlanDetailsScreenState extends State<TransportPlanDetailsScreen>
             final double gap = isWide ? 20.0 : 14.0;
 
             final Widget routePickupSection = _SectionCard(
-              title: ' Route & Pickup Details',
+              title: routeDetailsKey,
               children: [
                 LabelValue(
-                  label: 'Route Name',
-                  value: planDetails.route?.name ?? 'Not specified',
+                  label: routeNameKey,
+                  value: planDetails.route?.name ?? Utils.getTranslatedLabel(naKey),
                   addTopSpacing: false,
                 ),
                 LabelValue(
-                  label: 'Pickup Location',
-                  value: planDetails.pickupStop?.name ?? 'Not specified',
+                  label: pickupPointKey,
+                  value: planDetails.pickupStop?.name ?? Utils.getTranslatedLabel(naKey),
                 ),
                 LabelValue(
-                  label: 'Shift',
+                  label: shiftKey,
                   value: planDetails.shiftDetails,
                 ),
                 LabelValue(
-                  label: 'Pickup Time',
+                  label: pickupTimeKey,
                   value: planDetails.pickupTimeFormatted,
                   addBottomSpacing: false,
                 ),
@@ -219,23 +219,23 @@ class _TransportPlanDetailsScreenState extends State<TransportPlanDetailsScreen>
             );
 
             final Widget planSection = _SectionCard(
-              title: ' Plan Details',
+              title: transportationPlanKey,
               children: [
                 LabelValue(
-                  label: 'Plan',
-                  value: planDetails.duration ?? 'Not specified',
+                  label: planKey,
+                  value: planDetails.duration ?? Utils.getTranslatedLabel(naKey),
                   addTopSpacing: false,
                 ),
                 LabelValue(
-                  label: 'Validity',
+                  label: validityKey,
                   value: planDetails.validityPeriod,
                 ),
                 LabelValue(
-                  label: 'Total Fee',
-                  value: planDetails.totalFee ?? 'Not specified',
+                  label: totalFeeKey,
+                  value: planDetails.totalFee ?? Utils.getTranslatedLabel(naKey),
                 ),
                 LabelValue(
-                  label: 'Payment Mode',
+                  label: paymentModeKey,
                   value: planDetails.paymentModeFormatted,
                   addBottomSpacing: false,
                 ),

@@ -464,8 +464,7 @@ class _StudentDiaryScreenState extends State<StudentDiaryScreen> {
                     )
                   else
                     ...filteredEntries.map((diaryStudent) {
-                      final entry =
-                          _convertDiaryStudentToEntryMap(diaryStudent);
+                      final entry = _convertDiaryStudentToEntryMap(diaryStudent);
                       return DiaryEntryCard(
                         entry: entry,
                       );
@@ -495,13 +494,11 @@ class _StudentDiaryScreenState extends State<StudentDiaryScreen> {
                             int? subjectId;
 
                             if (_selectedCategory != "allCategories") {
-                              categoryId =
-                                  _getCategoryIdFromName(_selectedCategory);
+                              categoryId = _getCategoryIdFromName(_selectedCategory);
                             }
 
                             if (_selectedSubject != "allSubjects") {
-                              subjectId =
-                                  _getSubjectIdFromName(_selectedSubject);
+                              subjectId = _getSubjectIdFromName(_selectedSubject);
                             }
 
                             context.read<DiariesCubit>().fetchMore(

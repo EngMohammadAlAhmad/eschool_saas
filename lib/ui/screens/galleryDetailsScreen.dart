@@ -245,7 +245,7 @@ class _GalleryDetailsScreenState extends State<GalleryDetailsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(
+              /*const SizedBox(
                 height: 25,
               ),
               Text(
@@ -254,7 +254,7 @@ class _GalleryDetailsScreenState extends State<GalleryDetailsScreen> {
               ),
               const SizedBox(
                 height: 2.5,
-              ),
+              ),*/
               ReadMoreText(
                 widget.gallery.description ?? "",
                 trimLines: 3,
@@ -268,9 +268,9 @@ class _GalleryDetailsScreenState extends State<GalleryDetailsScreen> {
                 trimExpandedText: '',
                 moreStyle: TextStyle(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(
+              /*const SizedBox(
                 height: 25,
-              ),
+              ),*/
               _buildTabBarContainer(),
               const SizedBox(
                 height: 25,
@@ -288,14 +288,14 @@ class _GalleryDetailsScreenState extends State<GalleryDetailsScreen> {
           ),
         ),
         CustomAppBar(
-          title: widget.sessionYear.name ?? "",
+          title: widget.sessionYear.name! + " " + widget.gallery.title! ?? "",
         ),
         Padding(
           padding: EdgeInsets.only(
               top: MediaQuery.of(context).size.height *
-                  (Utils.appBarSmallerHeightPercentage * (0.7))),
+                  (Utils.appBarSmallerHeightPercentage * (1.1))),
           child: Container(
-            height: 200,
+            height: 150.0,
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               color: Theme.of(context).scaffoldBackgroundColor,

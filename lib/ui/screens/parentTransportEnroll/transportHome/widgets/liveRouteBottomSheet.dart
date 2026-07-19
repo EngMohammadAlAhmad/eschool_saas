@@ -164,7 +164,7 @@ class _LiveRouteBottomSheetState extends State<LiveRouteBottomSheet> {
                               const CustomCircularProgressIndicator(),
                               const SizedBox(height: 16),
                               Text(
-                                'Loading live route data...',
+                                Utils.getTranslatedLabel(loadingLiveRouteDataKey),
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.grey[600],
@@ -204,7 +204,7 @@ class _LiveRouteBottomSheetState extends State<LiveRouteBottomSheet> {
                             const CustomCircularProgressIndicator(),
                             const SizedBox(height: 16),
                             Text(
-                              'Loading live route data...',
+                              Utils.getTranslatedLabel(loadingLiveRouteDataKey),
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.grey[600],
@@ -304,7 +304,8 @@ class _LiveRouteBottomSheetState extends State<LiveRouteBottomSheet> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Currently at ${liveTrip.lastReachedStop?.name ?? 'School'}',
+                  '${Utils.getTranslatedLabel(currentlyAtKey)} '
+                      '${liveTrip.lastReachedStop?.name ?? Utils.getTranslatedLabel(schoolKey)}',
                   style: const TextStyle(
                     fontSize: 14,
                     color: Color(0xFF424242),
@@ -326,7 +327,7 @@ class _LiveRouteBottomSheetState extends State<LiveRouteBottomSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Bus No : ${liveTrip.vehicle.number}',
+              '${Utils.getTranslatedLabel(busNoKey)} : ${liveTrip.vehicle.number}',
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,

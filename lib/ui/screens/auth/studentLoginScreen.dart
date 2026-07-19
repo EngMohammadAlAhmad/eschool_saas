@@ -156,7 +156,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
             });
           },
           child: Text(
-            "${Utils.getTranslatedLabel(resetPasswordKey)}?",
+            Utils.getTranslatedLabel(resetPasswordKey),
             style: TextStyle(color: Theme.of(context).colorScheme.primary),
           ),
         ),
@@ -375,8 +375,8 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
                               }
                               Get.offNamed(Routes.parentLogin);
                             },
-                            child: RichText(
-                              text: TextSpan(
+                            child: Text.rich(
+                              TextSpan(
                                 children: [
                                   TextSpan(
                                     style: TextStyle(
@@ -393,11 +393,9 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
                                     style: TextStyle(
                                       fontWeight: FontWeight.w500,
                                       fontSize: 16.0,
-                                      color: Utils.getColorScheme(context)
-                                          .secondary,
+                                      color: Utils.getColorScheme(context).secondary,
                                     ),
-                                    text:
-                                        "${Utils.getTranslatedLabel(parentKey)}?",
+                                    text: Utils.getTranslatedLabel(parentKey),
                                   ),
                                 ],
                               ),

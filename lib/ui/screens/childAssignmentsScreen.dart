@@ -180,7 +180,7 @@ class _ChildAssignmentsScreenState extends State<ChildAssignmentsScreen> {
                   });
                   fetchAssignments();
                 },
-                titleKey: assignedKey,
+                titleKey: assignedHomeWKey,
               ),
               CustomTabBarContainer(
                 boxConstraints: boxConstraints,
@@ -193,7 +193,7 @@ class _ChildAssignmentsScreenState extends State<ChildAssignmentsScreen> {
                   });
                   fetchAssignments();
                 },
-                titleKey: submittedKey,
+                titleKey: submittedHomeWKey,
               )
             ],
           );

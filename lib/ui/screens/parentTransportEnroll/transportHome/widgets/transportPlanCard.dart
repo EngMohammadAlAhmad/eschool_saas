@@ -20,6 +20,23 @@ class TransportPlanCard extends StatelessWidget {
     final isExpiring = plan?.expiresInDays != null && plan!.expiresInDays! <= 7;
     final isParent = context.read<AuthCubit>().isParent();
 
+    final statusKey = plan?.status?.toLowerCase() ?? 'active';
+    final mappedStatusKey = switch (statusKey) {
+      'active' => activeKey,
+      'inactive' => inactiveKey,
+      'expired' => expiredKey,
+      'pending' => pendingKey,
+      _ => statusKey,
+    };
+
+    final durationKey = plan?.duration?.toLowerCase() ?? monthlyKey;
+    final mappedDurationKey = switch (durationKey) {
+      'monthly' => monthlyKey,
+      'quarterly' => quarterlyKey,
+      'annually' => annuallyKey,
+      _ => durationKey,
+    };
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -32,14 +49,14 @@ class TransportPlanCard extends StatelessWidget {
               : null,
           title: transportationPlanKey,
           trailing: EnrollStatusChip(
-            title: plan?.status?.capitalize ?? activeKey,
+            title: mappedStatusKey,
             background: statusColor.background,
             foreground: statusColor.foreground,
           ),
           children: [
             LabelValue(
-              label: planKey,
-              value: plan?.duration ?? monthlyKey,
+              label: plan2Key,
+              value: mappedDurationKey,
             ),
             LabelValue(
               label: validityKey,

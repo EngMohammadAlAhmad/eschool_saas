@@ -224,17 +224,26 @@ class _PlanHistoryCard extends StatelessWidget {
     final bool isExpiring =
         isActive && plan.expiresInDays != null && plan.expiresInDays! <= 7;
 
-    final String? displayStatus = isPending ? pendingKey : plan.planStatus;
+    final String? statusKey = isPending ? pendingKey : plan.planStatus;
     final statusColor = isPending
         ? (
             background: const Color(0xFFFFF2E8),
             foreground: const Color(0xFFFF8C00),
           )
         : _getStatusColor(plan.planStatus);
-    final statusLabel = displayStatus != null
-        ? displayStatus.substring(0, 1).toUpperCase() +
-            displayStatus.substring(1)
-        : null;
+
+    String? statusLabel;
+    if (statusKey != null) {
+      final mappedKey = switch (statusKey.toLowerCase()) {
+        'paid' => paidKey,
+        'active' => activeKey,
+        'inactive' => inactiveKey,
+        'expired' => expiredKey,
+        'pending' => pendingKey,
+        _ => statusKey,
+      };
+      statusLabel = Utils.getTranslatedLabel(mappedKey);
+    }
 
     return EnrollCard(
       onTap: isActive
