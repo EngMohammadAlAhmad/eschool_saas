@@ -71,12 +71,12 @@ Future<void> initializeApp() async {
 
   SystemChrome.setEnabledSystemUIMode(
     SystemUiMode.edgeToEdge,
-  );
+    );
 
-  HttpOverrides.global = MyHttpOverrides();
+    HttpOverrides.global = MyHttpOverrides();
 
-  //Register the licence of font
-  LicenseRegistry.addLicense(() async* {
+    //Register the licence of font
+    LicenseRegistry.addLicense(() async* {
     final license = await rootBundle.loadString('google_fonts/OFL.txt');
     yield LicenseEntryWithLineBreaks(['google_fonts'], license);
   });

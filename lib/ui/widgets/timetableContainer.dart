@@ -53,6 +53,9 @@ class _TimeTableContainerState extends State<TimeTableContainer>
   ];
 
   late int _currentSelectedDayIndex = DateTime.now().weekday % 7;
+  late final PageController _pageController =
+      PageController(initialPage: _currentSelectedDayIndex);
+  late final ScrollController _daysScrollController = ScrollController();
 
   @override
   void initState() {
@@ -62,13 +65,34 @@ class _TimeTableContainerState extends State<TimeTableContainer>
             useParentApi: context.read<AuthCubit>().isParent(),
             childId: widget.childId,
           );
+      _scrollToSelectedDay();
     });
   }
 
-  List<TimeTableSlot> _buildTimeTableSlots(List<TimeTableSlot> timeTableSlot) {
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _daysScrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToSelectedDay() {
+    if (_daysScrollController.hasClients) {
+      // Approximate width of day container (padding + text width + margin)
+      // Since it's horizontal scroll, we try to center it or at least make it visible
+      final offset = _currentSelectedDayIndex * 60.0;
+      _daysScrollController.animateTo(
+        offset,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  List<TimeTableSlot> _buildTimeTableSlots(
+      List<TimeTableSlot> timeTableSlot, int dayIndex) {
     final dayWiseTimeTableSlots = timeTableSlot
-        .where((element) =>
-            element.day == _orderedFullDayNames[_currentSelectedDayIndex])
+        .where((element) => element.day == _orderedFullDayNames[dayIndex])
         .toList();
     return dayWiseTimeTableSlots;
   }
@@ -228,6 +252,8 @@ class _TimeTableContainerState extends State<TimeTableContainer>
         setState(() {
           _currentSelectedDayIndex = index;
         });
+        _pageController.jumpToPage(index);
+        _scrollToSelectedDay();
       },
       borderRadius: BorderRadius.circular(5.0),
       child: Container(
@@ -238,7 +264,7 @@ class _TimeTableContainerState extends State<TimeTableContainer>
               ? Theme.of(context).colorScheme.primary
               : Colors.transparent,
         ),
-        margin: EdgeInsetsDirectional.only(end: 12.5),
+        margin: const EdgeInsetsDirectional.only(end: 12.5),
         padding: const EdgeInsets.all(7.5),
         child: Text(
           Utils.getTranslatedLabel(_orderedDayLabels[index]),
@@ -262,6 +288,7 @@ class _TimeTableContainerState extends State<TimeTableContainer>
     }
 
     return SingleChildScrollView(
+      controller: _daysScrollController,
       scrollDirection: Axis.horizontal,
       padding: EdgeInsetsDirectional.symmetric(
           horizontal: MediaQuery.of(context).size.width * (0.075)),
@@ -377,41 +404,71 @@ class _TimeTableContainerState extends State<TimeTableContainer>
     return BlocBuilder<TimeTableCubit, TimeTableState>(
       builder: (context, state) {
         if (state is TimeTableFetchSuccess) {
-          final timetableSlots = _buildTimeTableSlots(state.timeTable);
-          return SizedBox(
-            width: MediaQuery.of(context).size.width,
-            child: timetableSlots.isEmpty
-                ? NoDataContainer(
-                    key: isApplicationItemAnimationOn ? UniqueKey() : null,
-                    titleKey: noLecturesKey,
-                  )
-                : Column(
-                    children: List.generate(
-                      timetableSlots.length,
-                      (index) => Animate(
-                        key: isApplicationItemAnimationOn ? UniqueKey() : null,
-                        effects: listItemAppearanceEffects(
-                          itemIndex: index,
-                          totalLoadedItems: timetableSlots.length,
+          return PageView.builder(
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() {
+                _currentSelectedDayIndex = index;
+              });
+              _scrollToSelectedDay();
+            },
+            itemCount: _orderedDayLabels.length,
+            itemBuilder: (context, dayIndex) {
+              final timetableSlots =
+                  _buildTimeTableSlots(state.timeTable, dayIndex);
+              return SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  bottom: Utils.getScrollViewBottomPadding(context),
+                  top: Utils.getScrollViewTopPadding(
+                        context: context,
+                        appBarHeightPercentage:
+                            Utils.appBarMediumtHeightPercentage,
+                      ) +
+                      MediaQuery.of(context).size.height * 0.05 +
+                      50, // 50 is approximate height of _buildDays()
+                ),
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: timetableSlots.isEmpty
+                      ? NoDataContainer(
+                          key:
+                              isApplicationItemAnimationOn ? UniqueKey() : null,
+                          titleKey: noLecturesKey,
+                        )
+                      : Column(
+                          children: List.generate(
+                            timetableSlots.length,
+                            (index) => Animate(
+                              key: isApplicationItemAnimationOn
+                                  ? UniqueKey()
+                                  : null,
+                              effects: listItemAppearanceEffects(
+                                itemIndex: index,
+                                totalLoadedItems: timetableSlots.length,
+                              ),
+                              child: _buildTimeTableSlotDetailsContainer(
+                                timeTableSlot: timetableSlots[index],
+                              ),
+                            ),
+                          ),
                         ),
-                        child: _buildTimeTableSlotDetailsContainer(
-                          timeTableSlot: timetableSlots[index],
-                        ),
-                      ),
-                    ),
-                  ),
+                ),
+              );
+            },
           );
         }
         if (state is TimeTableFetchFailure) {
-          return ErrorContainer(
-            key: isApplicationItemAnimationOn ? UniqueKey() : null,
-            errorMessageCode: state.errorMessage,
-            onTapRetry: () {
-              context.read<TimeTableCubit>().fetchStudentTimeTable(
-                    useParentApi: context.read<AuthCubit>().isParent(),
-                    childId: widget.childId,
-                  );
-            },
+          return Center(
+            child: ErrorContainer(
+              key: isApplicationItemAnimationOn ? UniqueKey() : null,
+              errorMessageCode: state.errorMessage,
+              onTapRetry: () {
+                context.read<TimeTableCubit>().fetchStudentTimeTable(
+                      useParentApi: context.read<AuthCubit>().isParent(),
+                      childId: widget.childId,
+                    );
+              },
+            ),
           );
         }
 
@@ -424,33 +481,22 @@ class _TimeTableContainerState extends State<TimeTableContainer>
   Widget build(BuildContext context) {
     return Stack(
       children: [
+        _buildTimeTable(),
         Align(
           alignment: Alignment.topCenter,
-          child: SingleChildScrollView(
-            padding: EdgeInsets.only(
-              bottom: Utils.getScrollViewBottomPadding(context),
-              top: Utils.getScrollViewTopPadding(
-                context: context,
-                appBarHeightPercentage: Utils.appBarMediumtHeightPercentage,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildAppBar(),
+              Container(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).size.height * (0.025),
+                ),
+                child: _buildDays(),
               ),
-            ),
-            child: Column(
-              children: [
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * (0.025),
-                ),
-                _buildDays(),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * (0.025),
-                ),
-                _buildTimeTable(),
-              ],
-            ),
+            ],
           ),
-        ),
-        Align(
-          alignment: Alignment.topCenter,
-          child: _buildAppBar(),
         ),
       ],
     );

@@ -181,7 +181,7 @@ class _AttendanceContainerState extends State<AttendanceContainer> {
           ),
           PositionedDirectional(
             bottom: -20,
-            start: MediaQuery.of(context).size.width * (0.075),
+            start: MediaQuery.of(context).size.width * (0.04),
             child: Container(
               height: 50,
               decoration: BoxDecoration(
@@ -198,7 +198,7 @@ class _AttendanceContainerState extends State<AttendanceContainer> {
                 ],
                 color: Theme.of(context).scaffoldBackgroundColor,
               ),
-              width: MediaQuery.of(context).size.width * (0.85),
+              width: MediaQuery.of(context).size.width * (0.92),
               child: Stack(
                 children: [
                   Align(
@@ -284,7 +284,7 @@ class _AttendanceContainerState extends State<AttendanceContainer> {
               Localizations.localeOf(context).languageCode,
           startingDayOfWeek: StartingDayOfWeek.sunday,
           headerVisible: false,
-          daysOfWeekHeight: 40,
+          daysOfWeekHeight: 50,
           onPageChanged: (DateTime dateTime) {
             setState(() {
               focusedDay = dateTime;
@@ -361,10 +361,12 @@ class _AttendanceContainerState extends State<AttendanceContainer> {
             weekendStyle: TextStyle(
               color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.bold,
+              fontSize: 13,
             ),
             weekdayStyle: TextStyle(
               color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.bold,
+              fontSize: 13,
             ),
           ),
           headerStyle: const HeaderStyle(
@@ -422,7 +424,7 @@ class _AttendanceContainerState extends State<AttendanceContainer> {
 
                 return Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width * (0.075),
+                    horizontal: MediaQuery.of(context).size.width * (0.04),
                   ),
                   child: Column(
                     children: [
@@ -482,7 +484,7 @@ class _AttendanceContainerState extends State<AttendanceContainer> {
 
               return Padding(
                 padding: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * (0.075),
+                  horizontal: MediaQuery.of(context).size.width * (0.04),
                 ),
                 child: LayoutBuilder(
                   builder: (context, boxConstraints) {

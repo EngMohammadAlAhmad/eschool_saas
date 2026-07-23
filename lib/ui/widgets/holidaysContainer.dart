@@ -1,4 +1,3 @@
-import 'package:eschool/cubits/authCubit.dart';
 import 'package:eschool/cubits/holidaysCubit.dart';
 import 'package:eschool/cubits/schoolConfigurationCubit.dart';
 import 'package:eschool/data/models/holiday.dart';
@@ -163,7 +162,7 @@ class _HolidaysContainerState extends State<HolidaysContainer> {
         locale: Get.locale?.languageCode ??
             Localizations.localeOf(context).languageCode,
         headerVisible: false,
-        daysOfWeekHeight: 40,
+        daysOfWeekHeight: 50.0,
         onPageChanged: (DateTime dateTime) {
           setState(() {
             focusedDay = dateTime;
@@ -172,8 +171,8 @@ class _HolidaysContainerState extends State<HolidaysContainer> {
           //
         },
 
-        onCalendarCreated: (contoller) {
-          calendarPageController = contoller;
+        onCalendarCreated: (controller) {
+          calendarPageController = controller;
         },
 
         holidayPredicate: (dateTime) {
@@ -199,10 +198,12 @@ class _HolidaysContainerState extends State<HolidaysContainer> {
           weekendStyle: TextStyle(
             color: Theme.of(context).colorScheme.primary,
             fontWeight: FontWeight.bold,
+            fontSize: 13.0,
           ),
           weekdayStyle: TextStyle(
             color: Theme.of(context).colorScheme.primary,
             fontWeight: FontWeight.bold,
+            fontSize: 13.0,
           ),
         ),
         headerStyle:
@@ -219,10 +220,8 @@ class _HolidaysContainerState extends State<HolidaysContainer> {
       alignment: Alignment.topCenter,
       child: SingleChildScrollView(
         padding: EdgeInsets.only(
-          left: MediaQuery.of(context).size.width *
-              Utils.screenContentHorizontalPaddingInPercentage,
-          right: MediaQuery.of(context).size.width *
-              Utils.screenContentHorizontalPaddingInPercentage,
+          left: MediaQuery.of(context).size.width * (0.04),
+          right: MediaQuery.of(context).size.width * (0.04),
           bottom: Utils.getScrollViewBottomPadding(context),
           top: Utils.getScrollViewTopPadding(
             context: context,
@@ -328,7 +327,7 @@ class _HolidaysContainerState extends State<HolidaysContainer> {
           ),
           PositionedDirectional(
             bottom: -20,
-            start: MediaQuery.of(context).size.width * (0.075),
+            start: MediaQuery.of(context).size.width * (0.04),
             child: Container(
               height: 50,
               decoration: BoxDecoration(
@@ -345,7 +344,7 @@ class _HolidaysContainerState extends State<HolidaysContainer> {
                 ],
                 color: Theme.of(context).scaffoldBackgroundColor,
               ),
-              width: MediaQuery.of(context).size.width * (0.85),
+              width: MediaQuery.of(context).size.width * (0.92),
               child: Stack(
                 children: [
                   Align(
